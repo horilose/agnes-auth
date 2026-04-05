@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход в Agnes</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <style>
         body {
             background-color: #151515;
@@ -53,28 +53,37 @@
         <h1>Вход в Agnes</h1>
         <p>Выберите удобный сервис.<br>После авторизации вы автоматически вернетесь в приложение.</p>
         
-        <button class="btn btn-github" onclick="login('github')">Войти через GitHub</button>
-        <button class="btn btn-discord" onclick="login('discord')">Войти через Discord</button>
+        <button class="btn btn-github" onclick="login(event, 'github')">Войти через GitHub</button>
+        <button class="btn btn-discord" onclick="login(event, 'discord')">Войти через Discord</button>
     </div>
 
     <script>
-        // Твои ключи
         const supabaseUrl = 'https://cpvzerdqdnwyiiykcsjg.supabase.co';
         const supabaseKey = 'sb_publishable_PG3sCVKzOERXpjy3ygFmUg_VwfeKIKU';
         
-        // Создаем клиента
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Функция входа
-        async function login(providerName) {
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: providerName,
-                options: {
-                    redirectTo: 'agnes://auth' // Самая важная строка: отправляем обратно в программу!
+        async function login(event, providerName) {
+            // Меняем текст кнопки для визуального отклика
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Подключение...";
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: providerName,
+                    options: {
+                        redirectTo: 'agnes://auth'
+                    }
+                });
+                
+                if (error) {
+                    alert('Ошибка Supabase: ' + error.message);
+                    btn.innerText = originalText;
                 }
-            });
-            if (error) {
-                alert('Произошла ошибка: ' + error.message);
+            } catch (err) {
+                alert('Системная ошибка: ' + err.message);
+                btn.innerText = originalText;
             }
         }
     </script>
