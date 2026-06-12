@@ -198,7 +198,7 @@
 
                 if (data.session) {
                     // Успех! Создаем ссылку для передачи токенов в десктопное приложение
-                    const redirectUrl = `agnes://auth#access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}`;
+                    const redirectUrl = `agnes://auth#access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}&expires_in=${data.session.expires_in}&token_type=${data.session.token_type}`;
                     
                     document.getElementById('status-text').innerHTML = '<span style="color:white; font-weight:bold;">Успешно!</span><br>Открываем Agnes...';
                     document.getElementById('otp-step').style.display = 'none';
