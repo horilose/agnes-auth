@@ -15,17 +15,18 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 40px;
+            padding: 20px; /* Те самые маленькие отступы по краям браузера */
             box-sizing: border-box;
-            gap: 60px;
+            gap: 80px; /* Чуть отодвинули правую часть, раз левая стала массивнее */
         }
 
-        /* --- ЛЕВАЯ ЧАСТЬ --- */
+        /* --- ЛЕВАЯ ЧАСТЬ (Высокий прямоугольник) --- */
         .visual-panel {
-            width: 320px;
-            height: 320px;
+            width: 440px; /* Сделали шире, чтобы соблюсти пропорции */
+            height: calc(100vh - 40px); /* 100% высоты окна минус отступы сверху и снизу (20+20) */
+            min-height: 500px;
             background-color: rgba(82, 81, 73, 0.5);
-            border-radius: 28px;
+            border-radius: 32px;
             position: relative;
             overflow: hidden;
             flex-shrink: 0;
@@ -34,22 +35,23 @@
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(35px);
+            filter: blur(40px);
             opacity: 0.8;
             animation-iteration-count: infinite;
             animation-direction: alternate;
             animation-timing-function: ease-in-out;
         }
 
-        .orb-1 { width: 110px; height: 110px; background: #DCDBCE; top: 10%; left: 15%; animation-name: floatOrb1; animation-duration: 8s; }
-        .orb-2 { width: 140px; height: 140px; background: #525149; bottom: 10%; left: 20%; animation-name: floatOrb2; animation-duration: 11s; }
-        .orb-3 { width: 100px; height: 100px; background: #8F8E83; top: 25%; right: 15%; animation-name: floatOrb3; animation-duration: 9s; }
+        /* Слегка увеличили круги под новый большой размер панели */
+        .orb-1 { width: 140px; height: 140px; background: #DCDBCE; top: 15%; left: 10%; animation-name: floatOrb1; animation-duration: 8s; }
+        .orb-2 { width: 180px; height: 180px; background: #525149; bottom: 15%; left: 20%; animation-name: floatOrb2; animation-duration: 11s; }
+        .orb-3 { width: 120px; height: 120px; background: #8F8E83; top: 40%; right: 15%; animation-name: floatOrb3; animation-duration: 9s; }
 
-        @keyframes floatOrb1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 20px) scale(1.1); } }
-        @keyframes floatOrb2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, -30px) scale(1.05); } }
-        @keyframes floatOrb3 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-20px, 30px) scale(1.15); } }
+        @keyframes floatOrb1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 30px) scale(1.1); } }
+        @keyframes floatOrb2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, -40px) scale(1.05); } }
+        @keyframes floatOrb3 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-30px, 40px) scale(1.15); } }
 
-        /* --- ПРАВАЯ ЧАСТЬ --- */
+        /* --- ПРАВАЯ ЧАСТЬ (Контент) --- */
         .content-panel {
             display: flex;
             flex-direction: column;
@@ -78,7 +80,7 @@
         }
 
         .btn:hover { background-color: #616056; }
-        .btn:active { transform: scale(1.03); }
+        .btn:active { transform: scale(1.03); } /* Кнопка выходит наружу при клике */
 
         /* Скользящий кружок */
         .btn-icon-wrapper {
@@ -93,13 +95,12 @@
             justify-content: center;
             align-items: center;
             z-index: 2; 
-            /* Сделали анимацию более плавной и медленной (0.8s) */
             transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .btn-icon-wrapper svg { width: 20px; height: 20px; fill: white; }
 
-        /* Магия при наведении: кружок едет направо БЕЗ вращения */
+        /* Магия при наведении: кружок едет направо */
         .btn:hover .btn-icon-wrapper {
             left: 162px; 
         }
@@ -115,7 +116,7 @@
             pointer-events: none; 
         }
 
-        /* Текст 1: Призрачный (центр-право) */
+        /* Текст 1: Призрачный */
         .btn-text-ghost {
             position: absolute;
             color: rgba(255, 255, 255, 0.5); 
@@ -123,11 +124,10 @@
             font-weight: 700;
             transform: translateX(18px); 
             opacity: 1;
-            /* Ждет пока медленный кружок вернется на место */
             transition: opacity 0.3s ease-in 0.4s; 
         }
 
-        /* Текст 2: Белый цельный (центр-лево) */
+        /* Текст 2: Белый цельный */
         .btn-text-solid {
             position: absolute;
             color: white; 
@@ -138,7 +138,7 @@
             transition: opacity 0.2s ease-out 0s; 
         }
 
-        /* Анимации текстов при наведении мыши */
+        /* Анимации текстов */
         .btn:hover .btn-text-ghost {
             opacity: 0;
             transition: opacity 0.2s ease-out 0s; 
@@ -146,7 +146,6 @@
 
         .btn:hover .btn-text-solid {
             opacity: 1;
-            /* Появляется с задержкой, пока кружок проезжает половину пути */
             transition: opacity 0.3s ease-in 0.4s; 
         }
 
@@ -162,7 +161,11 @@
         .btn-back:hover { color: white; }
         #error-msg { color: #E44332; font-size: 13px; margin-top: 15px; display: none; text-align: center; width: 210px; }
 
-        @media (max-width: 800px) { body { flex-direction: column; gap: 40px; } }
+        /* --- АДАПТИВ (на мобилках левая панель сплющится, чтобы не ломать верстку) --- */
+        @media (max-width: 800px) { 
+            body { flex-direction: column; gap: 40px; height: auto; } 
+            .visual-panel { width: 100%; height: 250px; min-height: 250px; }
+        }
     </style>
 </head>
 <body>
