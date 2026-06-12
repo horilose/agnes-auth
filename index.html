@@ -23,65 +23,213 @@
             border: 1px solid #333333;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 300px;
+            width: 320px;
         }
-        h1 { margin-top: 0; font-size: 24px; }
-        p { color: #aaaaaa; margin-bottom: 30px; font-size: 13px; line-height: 1.5; }
+        h1 { margin-top: 0; font-size: 26px; }
+        p { color: #aaaaaa; margin-bottom: 25px; font-size: 14px; line-height: 1.5; }
+        
         .btn {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin-bottom: 12px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: none;
             color: white;
             font-weight: bold;
             cursor: pointer;
             font-size: 14px;
             transition: 0.2s;
+            box-sizing: border-box;
         }
+        .btn-email { background-color: #525149; }
+        .btn-email:hover { background-color: #6A695E; }
         .btn-github { background-color: #24292F; border: 1px solid #444; }
         .btn-github:hover { background-color: #1F2428; }
         .btn-discord { background-color: #5865F2; }
         .btn-discord:hover { background-color: #4752C4; }
+        .btn-back { background-color: transparent; color: #888888; margin-top: 10px; padding: 5px; }
+        .btn-back:hover { color: white; }
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background-color: #151515;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .input-field:focus { outline: none; border-color: #888; }
+        
+        /* Контейнеры для переключения видов */
+        #email-step, #otp-step { display: none; }
+        
+        #error-msg {
+            color: #E44332;
+            font-size: 13px;
+            margin-top: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>Вход в Agnes</h1>
-        <p>После авторизации вы автоматически вернетесь в приложение.</p>
+        <p id="status-text">Выберите удобный способ авторизации. Пароль не потребуется.</p>
         
-        <button class="btn btn-github" onclick="login(event, 'github')">Войти через GitHub</button>
-        <button class="btn btn-discord" onclick="login(event, 'discord')">Войти через Discord</button>
+        <!-- ШАГ 1: ВЫБОР ПРОВАЙДЕРА -->
+        <div id="main-step">
+            <button class="btn btn-email" onclick="showEmailStep()">Войти по почте</button>
+            <button class="btn btn-discord" onclick="loginOAuth(event, 'discord')">Через Discord</button>
+            <button class="btn btn-github" onclick="loginOAuth(event, 'github')">Через GitHub</button>
+        </div>
+
+        <!-- ШАГ 2: ВВОД ПОЧТЫ -->
+        <div id="email-step">
+            <input type="email" id="email-input" class="input-field" placeholder="Ваша электронная почта">
+            <button class="btn btn-email" id="send-code-btn" onclick="sendCode()">Получить код</button>
+            <button class="btn btn-back" onclick="showMainStep()">← Назад</button>
+        </div>
+
+        <!-- ШАГ 3: ВВОД КОДА -->
+        <div id="otp-step">
+            <input type="text" id="otp-input" class="input-field" placeholder="Код из письма" maxlength="8" autocomplete="one-time-code">
+            <button class="btn btn-email" id="verify-code-btn" onclick="verifyCode()">Войти в приложение</button>
+            <button class="btn btn-back" onclick="showEmailStep()">← Изменить почту</button>
+        </div>
+
+        <div id="error-msg"></div>
     </div>
 
     <script>
         const supabaseUrl = 'https://cpvzerdqdnwyiiykcsjg.supabase.co';
         const supabaseKey = 'sb_publishable_PG3sCVKzOERXpjy3ygFmUg_VwfeKIKU';
-        
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function login(event, providerName) {
+        let currentUserEmail = '';
+
+        // --- ЛОГИКА ИНТЕРФЕЙСА ---
+        function showError(msg) {
+            const errorDiv = document.getElementById('error-msg');
+            errorDiv.innerText = msg;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error-msg').style.display = 'none';
+        }
+
+        function showMainStep() {
+            hideError();
+            document.getElementById('main-step').style.display = 'block';
+            document.getElementById('email-step').style.display = 'none';
+            document.getElementById('otp-step').style.display = 'none';
+            document.getElementById('status-text').innerText = 'Выберите удобный способ авторизации. Пароль не потребуется.';
+        }
+
+        function showEmailStep() {
+            hideError();
+            document.getElementById('main-step').style.display = 'none';
+            document.getElementById('email-step').style.display = 'block';
+            document.getElementById('otp-step').style.display = 'none';
+            document.getElementById('status-text').innerText = 'Мы отправим код подтверждения на вашу почту.';
+            document.getElementById('email-input').focus();
+        }
+
+        function showOtpStep() {
+            hideError();
+            document.getElementById('main-step').style.display = 'none';
+            document.getElementById('email-step').style.display = 'none';
+            document.getElementById('otp-step').style.display = 'block';
+            document.getElementById('status-text').innerText = 'Код отправлен на: \n' + currentUserEmail;
+            document.getElementById('otp-input').focus();
+        }
+
+        // --- ЛОГИКА АВТОРИЗАЦИИ (БЕЗ ПАРОЛЯ) ---
+        async function sendCode() {
+            hideError();
+            const email = document.getElementById('email-input').value.trim();
+            if (!email) return showError('Пожалуйста, введите почту.');
+
+            const btn = document.getElementById('send-code-btn');
+            btn.innerText = 'Отправка...';
+            btn.disabled = true;
+
+            try {
+                const { error } = await supabaseClient.auth.signInWithOtp({
+                    email: email
+                });
+
+                if (error) throw error;
+
+                currentUserEmail = email;
+                showOtpStep();
+            } catch (err) {
+                showError('Ошибка: ' + err.message);
+            } finally {
+                btn.innerText = 'Получить код';
+                btn.disabled = false;
+            }
+        }
+
+        async function verifyCode() {
+            hideError();
+            const code = document.getElementById('otp-input').value.trim();
+            if (!code) return showError('Пожалуйста, введите код.');
+
+            const btn = document.getElementById('verify-code-btn');
+            btn.innerText = 'Проверка...';
+            btn.disabled = true;
+
+            try {
+                const { data, error } = await supabaseClient.auth.verifyOtp({
+                    email: currentUserEmail,
+                    token: code,
+                    type: 'email'
+                });
+
+                if (error) throw error;
+
+                if (data.session) {
+                    // Успех! Создаем ссылку для передачи токенов в десктопное приложение
+                    const redirectUrl = `agnes://auth#access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}`;
+                    
+                    document.getElementById('status-text').innerHTML = '<span style="color:white; font-weight:bold;">Успешно!</span><br>Открываем Agnes...';
+                    document.getElementById('otp-step').style.display = 'none';
+                    
+                    // Перенаправляем пользователя в приложение
+                    window.location.href = redirectUrl;
+                }
+            } catch (err) {
+                showError('Неверный код. Попробуйте еще раз.');
+                btn.innerText = 'Войти в приложение';
+                btn.disabled = false;
+            }
+        }
+
+        // --- СТАРАЯ ЛОГИКА OAUTH (Discord / GitHub) ---
+        async function loginOAuth(event, providerName) {
             const btn = event.target;
             const originalText = btn.innerText;
             btn.innerText = "Подключение...";
             
             try {
-                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                const { error } = await supabaseClient.auth.signInWithOAuth({
                     provider: providerName,
                     options: {
                         redirectTo: 'agnes://auth'
                     }
                 });
                 
-                if (error) {
-                    alert('Ошибка Supabase: ' + error.message);
-                    btn.innerText = originalText;
-                }
+                if (error) throw error;
             } catch (err) {
-                alert('Системная ошибка: ' + err.message);
+                showError('Ошибка: ' + err.message);
                 btn.innerText = originalText;
             }
         }
