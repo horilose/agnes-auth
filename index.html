@@ -42,7 +42,7 @@
         @keyframes floatOrb2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, -40px) scale(1.05); } }
         @keyframes floatOrb3 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-30px, 40px) scale(1.15); } }
 
-        /* --- ПРАВАЯ ЧАСТЬ (Масштабированная) --- */
+        /* --- ПРАВАЯ ЧАСТЬ --- */
         .content-wrapper {
             flex-grow: 1; 
             display: flex; justify-content: center; align-items: center;
@@ -52,10 +52,9 @@
             display: flex;
             flex-direction: column;
             width: 360px; 
-            /* Выдаем правой панели точную высоту левой, чтобы прижать нижние элементы */
             height: calc(100vh - 40px); 
             min-height: 500px;
-            position: relative;
+            position: relative; /* Важно для всплывающих плашек */
         }
 
         /* --- СТРУКТУРА ШАГОВ --- */
@@ -63,12 +62,12 @@
             display: none;
             flex-direction: column;
             width: 100%;
-            height: 100%; /* Занимает всю высоту content-panel */
+            height: 100%;
         }
-        #main-step { display: flex; } /* Первый шаг открыт по умолчанию */
+        #main-step { display: flex; } 
 
         .center-block {
-            flex-grow: 1; /* Расталкивает контент, забирая всё свободное место в центре */
+            flex-grow: 1; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -80,7 +79,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 2px; /* Идеальное визуальное выравнивание с дном левой панели */
+            padding-bottom: 2px;
         }
 
         h1 { margin: 0 0 8px 0; font-size: 28px; font-weight: 800; text-align: center; } 
@@ -129,7 +128,6 @@
         .btn-dark { background-color: #525149; color: white; }
         .btn-dark:hover { background-color: #616056; }
         
-        /* Кнопки в самом низу экрана */
         .btn-text-only { 
             background: transparent; color: #888; border: none; width: 280px; 
             font-size: 14px; margin: 6px auto; cursor: pointer; transition: color 0.2s; 
@@ -137,13 +135,14 @@
         }
         .btn-text-only:hover:not(:disabled) { color: white; }
         .btn-text-only:disabled { cursor: default; opacity: 0.5; }
-        .btn-text-only:last-child { margin-bottom: 0; } /* Прижимаем самую нижнюю кнопку ровно к краю */
+        .btn-text-only:last-child { margin-bottom: 0; }
 
-        /* --- СООБЩЕНИЯ ОБ ОШИБКАХ --- */
-        .error-msg { color: #E44332; font-size: 14px; margin-top: 15px; display: none; text-align: center; width: 280px; }
-        
-        /* Новая красивая плашка лимита отправки */
-        .rate-limit-msg {
+        /* --- ВСПЛЫВАЮЩАЯ ПЛАШКА (БЕЗ ПРЫЖКОВ ИНТЕРФЕЙСА) --- */
+        .toast-badge {
+            position: absolute;
+            bottom: 80px; /* Висит прямо над нижними кнопками */
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
             background-color: #7B7A71;
             color: white;
             border-radius: 14px;
@@ -152,10 +151,20 @@
             text-align: center;
             width: 280px;
             box-sizing: border-box;
-            margin-bottom: 20px;
-            display: none;
-            line-height: 1.4;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            z-index: 100;
+            pointer-events: none; /* Чтобы плашка не мешала кликать */
+            line-height: 1.4;
+        }
+        
+        /* Класс, который делает плашку видимой */
+        .toast-badge.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
         }
 
         /* --- ЯЧЕЙКИ ДЛЯ КОДА (OTP) --- */
@@ -186,6 +195,10 @@
     <div class="content-wrapper">
         <div class="content-panel">
             
+            <!-- Универсальная плашка для всех ошибок и уведомлений -->
+            <div id="toast-notification" class="toast-badge"></div>
+
+            <!-- ШАГ 1: ВЫБОР ПРОВАЙДЕРА -->
             <div id="main-step" class="step-container">
                 <div class="center-block">
                     <h1 id="main-title">Без авторизации никуда</h1>
@@ -223,19 +236,19 @@
                 </div>
             </div>
 
+            <!-- ШАГ 2: ВВОД ПОЧТЫ -->
             <div id="email-step" class="step-container">
                 <div class="center-block">
                     <input type="email" id="email-input" class="input-field" placeholder="Электронная почта">
                     <button class="btn-simple btn-dark" id="send-code-btn" onclick="sendCode()">Получить код</button>
-                    <div id="email-error-msg" class="error-msg"></div>
                 </div>
+                <!-- Кнопки прибиты к низу -->
                 <div class="bottom-block">
-                    <div class="rate-limit-msg" id="rate-limit-msg">Ты слишком быстр, мы не успеваем. Попробуй еще раз через минуту</div>
-                    
                     <button class="btn-text-only" onclick="showMainStep()">Вернуться назад</button>
                 </div>
             </div>
 
+            <!-- ШАГ 3: ВВОД КОДА -->
             <div id="otp-step" class="step-container">
                 <div class="center-block">
                     <h1 style="margin-bottom: 25px;">Введи код</h1>
@@ -247,8 +260,8 @@
                         <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
                         <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
                     </div>
-                    <div id="otp-error-msg" class="error-msg"></div>
                 </div>
+                <!-- Кнопки прибиты к низу -->
                 <div class="bottom-block">
                     <button class="btn-text-only" onclick="showEmailStep()">Изменить почту</button>
                     <button class="btn-text-only" id="resend-code-btn" onclick="resendCode()">Отправить код повторно (01:00)</button>
@@ -266,23 +279,28 @@
         let currentUserEmail = '';
         let timerInterval;
 
-        function hideAllErrors() {
-            document.getElementById('email-error-msg').style.display = 'none';
-            document.getElementById('otp-error-msg').style.display = 'none';
-            document.getElementById('rate-limit-msg').style.display = 'none';
+        // --- ЛОГИКА ПЛАШКИ (Toast Notification) ---
+        function showNotification(msg) {
+            const toast = document.getElementById('toast-notification');
+            toast.innerText = msg;
+            toast.classList.add('show');
+        }
+
+        function hideNotification() {
+            document.getElementById('toast-notification').classList.remove('show');
         }
 
         // Логика переключения экранов
         function showMainStep() {
-            hideAllErrors();
+            hideNotification();
             document.getElementById('main-step').style.display = 'flex';
             document.getElementById('email-step').style.display = 'none';
             document.getElementById('otp-step').style.display = 'none';
         }
 
         function showEmailStep() {
-            hideAllErrors();
-            clearInterval(timerInterval); // Сброс таймера
+            hideNotification();
+            clearInterval(timerInterval); 
             document.getElementById('main-step').style.display = 'none';
             document.getElementById('email-step').style.display = 'flex';
             document.getElementById('otp-step').style.display = 'none';
@@ -290,7 +308,7 @@
         }
 
         function showOtpStep() {
-            hideAllErrors();
+            hideNotification();
             document.getElementById('main-step').style.display = 'none';
             document.getElementById('email-step').style.display = 'none';
             document.getElementById('otp-step').style.display = 'flex';
@@ -303,7 +321,9 @@
             startResendTimer();
         }
 
-        // Отправка почты по клавише Enter
+        // Убираем ошибку, как только человек начинает печатать почту
+        document.getElementById('email-input').addEventListener('input', hideNotification);
+
         document.getElementById('email-input').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -315,6 +335,8 @@
         const otpBoxes = document.querySelectorAll('.otp-box');
         otpBoxes.forEach((box, index) => {
             box.addEventListener('input', (e) => {
+                hideNotification(); // Прячем ошибку, как только начали вводить новый код
+                
                 if (box.value.length > 1) box.value = box.value.slice(-1);
                 if (box.value !== '' && index < 5) otpBoxes[index + 1].focus();
                 checkAutoSubmit();
@@ -328,6 +350,7 @@
         // Вставка (Ctrl+V)
         document.getElementById('otp-container').addEventListener('paste', (e) => {
             e.preventDefault();
+            hideNotification();
             const digits = e.clipboardData.getData('text').trim().match(/\d/g);
             if (digits && digits.length >= 6) {
                 otpBoxes.forEach((box, i) => { box.value = digits[i]; });
@@ -335,7 +358,6 @@
             }
         });
 
-        // Автоматическая проверка кода при заполнении последней ячейки
         function checkAutoSubmit() {
             const code = Array.from(otpBoxes).map(b => b.value).join('');
             if (code.length === 6) verifyCode(code);
@@ -364,15 +386,10 @@
 
         // --- ВЗАИМОДЕЙСТВИЕ С SUPABASE ---
         async function sendCode(isResend = false) {
-            hideAllErrors();
+            hideNotification();
             const email = document.getElementById('email-input').value.trim();
             
-            if (!email) {
-                const errBox = document.getElementById('email-error-msg');
-                errBox.innerText = 'Введи почту.';
-                errBox.style.display = 'block';
-                return;
-            }
+            if (!email) return showNotification('Введи почту.');
 
             const btn = isResend ? document.getElementById('resend-code-btn') : document.getElementById('send-code-btn');
             btn.innerText = 'Отправка...';
@@ -387,13 +404,11 @@
                 else startResendTimer();
 
             } catch (err) {
-                // Если сработал антиспам Supabase - показываем красивую плашку
+                // Если сработал антиспам Supabase
                 if (err.message && (err.message.toLowerCase().includes('security') || err.message.toLowerCase().includes('seconds'))) {
-                    document.getElementById('rate-limit-msg').style.display = 'block';
+                    showNotification('Ты слишком быстр, мы не успеваем. Попробуй еще раз через минуту');
                 } else {
-                    const errBox = document.getElementById('email-error-msg');
-                    errBox.innerText = 'Ошибка: ' + err.message;
-                    errBox.style.display = 'block';
+                    showNotification('Ошибка: ' + err.message);
                 }
 
                 if (!isResend) {
@@ -411,7 +426,7 @@
         }
 
         async function verifyCode(code) {
-            hideAllErrors();
+            hideNotification();
             otpBoxes.forEach(box => box.disabled = true);
 
             try {
@@ -426,14 +441,12 @@
                 if (data.session) {
                     const redirectUrl = `agnes://auth#access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}&expires_in=${data.session.expires_in}&token_type=${data.session.token_type}`;
                     
-                    // Показываем заголовок об успехе, прячем всё остальное
                     document.getElementById('otp-step').innerHTML = '<div class="center-block"><h1>Успешно!</h1><p class="subtitle">Открываем Agnes...</p></div>';
                     window.location.href = redirectUrl;
                 }
             } catch (err) {
-                const errBox = document.getElementById('otp-error-msg');
-                errBox.innerText = 'Неверный код. Попробуй еще раз.';
-                errBox.style.display = 'block';
+                // Показываем плашку с ошибкой
+                showNotification('Код не правильный. Посмотри ещё раз');
                 
                 // Очищаем ячейки при ошибке
                 otpBoxes.forEach(box => { box.disabled = false; box.value = ''; });
@@ -457,7 +470,7 @@
                 });
                 if (error) throw error;
             } catch (err) {
-                alert('Ошибка: ' + err.message); // Для OAuth оставим системный алерт, чтобы не ломать верстку главного экрана
+                showNotification('Ошибка: ' + err.message); 
                 ghostText.innerText = originalText;
                 solidText.innerText = originalText;
             }
