@@ -7,101 +7,265 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <style>
         body {
-            background-color: #151515;
+            background-color: #1C1C1C;
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-        }
-        .card {
-            background-color: #1c1c1c;
             padding: 40px;
-            border-radius: 16px;
-            border: 1px solid #333333;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 320px;
+            box-sizing: border-box;
+            gap: 60px;
         }
-        h1 { margin-top: 0; font-size: 26px; }
-        p { color: #aaaaaa; margin-bottom: 25px; font-size: 14px; line-height: 1.5; }
-        
+
+        /* --- ЛЕВАЯ ЧАСТЬ (Квадрат со свечениями) --- */
+        .visual-panel {
+            width: 320px;
+            height: 320px;
+            background-color: rgba(82, 81, 73, 0.5); /* Цвет #525149 с прозрачностью 50% */
+            border-radius: 28px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(35px);
+            opacity: 0.8;
+            animation-iteration-count: infinite;
+            animation-direction: alternate;
+            animation-timing-function: ease-in-out;
+        }
+
+        .orb-1 {
+            width: 110px; height: 110px;
+            background: #DCDBCE;
+            top: 10%; left: 15%;
+            animation-name: floatOrb1;
+            animation-duration: 8s;
+        }
+
+        .orb-2 {
+            width: 140px; height: 140px;
+            background: #525149;
+            bottom: 10%; left: 20%;
+            animation-name: floatOrb2;
+            animation-duration: 11s;
+        }
+
+        .orb-3 {
+            width: 100px; height: 100px;
+            background: #8F8E83;
+            top: 25%; right: 15%;
+            animation-name: floatOrb3;
+            animation-duration: 9s;
+        }
+
+        @keyframes floatOrb1 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 20px) scale(1.1); }
+        }
+        @keyframes floatOrb2 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, -30px) scale(1.05); }
+        }
+        @keyframes floatOrb3 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-20px, 30px) scale(1.15); }
+        }
+
+        /* --- ПРАВАЯ ЧАСТЬ (Контент) --- */
+        .content-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 260px; /* Уменьшили ширину всего блока */
+            flex-shrink: 0;
+        }
+
+        h1 {
+            margin: 0 0 6px 0;
+            font-size: 19px; /* Пропорционально уменьшили заголовок */
+            font-weight: 800;
+            text-align: center;
+        }
+
+        p.subtitle {
+            color: #aaaaaa;
+            margin: 0 0 25px 0;
+            font-size: 14px; /* Пропорционально уменьшили подзаголовок */
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* --- КНОПКИ --- */
         .btn {
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 12px;
-            border-radius: 10px;
+            width: 210px; /* Уменьшили ширину кнопок */
+            height: 56px; /* Уменьшили высоту кнопок */
+            background-color: #525149;
+            border-radius: 28px; /* Половина высоты для овала */
+            padding: 0 8px; /* Уменьшили внутренние отступы */
+            margin: 0 auto 12px auto;
             border: none;
-            color: white;
-            font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
+            transition: background-color 0.2s, transform 0.15s cubic-bezier(0.18, 0.89, 0.32, 1.28);
             box-sizing: border-box;
         }
-        .btn-email { background-color: #525149; }
-        .btn-email:hover { background-color: #6A695E; }
-        .btn-github { background-color: #24292F; border: 1px solid #444; }
-        .btn-github:hover { background-color: #1F2428; }
-        .btn-discord { background-color: #5865F2; }
-        .btn-discord:hover { background-color: #4752C4; }
-        .btn-back { background-color: transparent; color: #888888; margin-top: 10px; padding: 5px; }
-        .btn-back:hover { color: white; }
 
+        .btn:hover {
+            background-color: #5d5c52;
+        }
+        
+        .btn:active {
+            transform: scale(1.03); /* Выходит наружу */
+        }
+
+        /* Кружок с иконкой */
+        .btn-icon-wrapper {
+            width: 40px; /* Пропорционально уменьшенный кружок */
+            height: 40px;
+            background-color: #7B7A71; 
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .btn-icon-wrapper svg {
+            width: 20px; /* Размер самой иконки */
+            height: 20px;
+            fill: white;
+        }
+
+        /* Текст кнопки */
+        .btn-text {
+            flex-grow: 1;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5); 
+            font-size: 13px; /* Уменьшенный шрифт кнопки */
+            font-weight: 700;
+            padding-right: 40px; /* Компенсируем уменьшенную ширину иконки */
+            transition: color 0.3s;
+        }
+
+        /* --- ВТОРОСТЕПЕННЫЕ ЭКРАНЫ --- */
+        #main-step { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        #email-step, #otp-step { display: none; width: 100%; flex-direction: column; align-items: center; }
+
+        /* Поля ввода и кнопки для шагов 2 и 3 */
         .input-field {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            border: 1px solid #444;
+            width: 210px;
+            height: 50px; /* Уменьшенная высота */
+            padding: 0 18px;
+            margin: 0 auto 12px auto;
+            border-radius: 25px;
+            border: 2px solid #333;
             background-color: #151515;
             color: white;
             font-size: 14px;
             box-sizing: border-box;
             text-align: center;
+            transition: border-color 0.3s;
         }
-        .input-field:focus { outline: none; border-color: #888; }
+        .input-field:focus { outline: none; border-color: #7B7A71; }
         
-        /* Контейнеры для переключения видов */
-        #email-step, #otp-step { display: none; }
+        .btn-simple {
+            width: 210px; 
+            height: 50px; 
+            border-radius: 25px; 
+            border: none; 
+            background: #DCDBCE; 
+            color: #151515; 
+            font-size: 14px;
+            font-weight: bold; 
+            cursor: pointer;
+            transition: transform 0.15s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+        .btn-simple:active { transform: scale(1.03); } 
+        
+        .btn-back { 
+            background: transparent; 
+            color: #888; 
+            border: none; 
+            width: 210px; 
+            font-size: 13px;
+            margin: 8px auto 0 auto; 
+            cursor: pointer; 
+            transition: color 0.2s;
+        }
+        .btn-back:hover { color: white; }
         
         #error-msg {
             color: #E44332;
             font-size: 13px;
             margin-top: 15px;
             display: none;
+            text-align: center;
+            width: 210px;
+        }
+
+        /* --- Адаптив --- */
+        @media (max-width: 800px) {
+            body {
+                flex-direction: column;
+                gap: 40px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Вход в Agnes</h1>
-        <p id="status-text">Выберите удобный способ авторизации. Пароль не потребуется.</p>
+
+    <div class="visual-panel">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="content-panel">
+        <h1>Без авторизации никуда</h1>
+        <p class="subtitle" id="status-text">Как тебе удобнее войти?</p>
         
-        <!-- ШАГ 1: ВЫБОР ПРОВАЙДЕРА -->
         <div id="main-step">
-            <button class="btn btn-email" onclick="showEmailStep()">Войти по почте</button>
-            <button class="btn btn-discord" onclick="loginOAuth(event, 'discord')">Через Discord</button>
-            <button class="btn btn-github" onclick="loginOAuth(event, 'github')">Через GitHub</button>
+            <button class="btn" onclick="showEmailStep()">
+                <div class="btn-icon-wrapper">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                </div>
+                <span class="btn-text">Почта</span>
+            </button>
+
+            <button class="btn" onclick="loginOAuth(event, 'discord')">
+                <div class="btn-icon-wrapper">
+                    <svg viewBox="0 0 24 24"><path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.33-.35-.76-.53-1.09a.09.09 0 0 0-.07-.03c-1.5.26-2.94.71-4.27 1.33-.01 0-.02.01-.03.02-2.72 4.07-3.47 8.03-3.1 11.95 0 .02.01.04.03.05 1.8 1.32 3.53 2.12 5.24 2.65.03.01.06-.01.07-.04.41-.56.77-1.14 1.1-1.74a.07.07 0 0 0-.04-.1c-.57-.22-1.13-.48-1.65-.78a.08.08 0 0 1-.01-.13c.12-.09.23-.19.35-.29a.07.07 0 0 1 .08-.01c3.54 1.61 7.37 1.61 10.9 0a.07.07 0 0 1 .08.01c.12.1.23.19.35.29a.08.08 0 0 1-.01.13c-.53.3-1.09.56-1.66.78a.07.07 0 0 0-.04.1c.33.6.69 1.18 1.1 1.74.01.03.04.05.07.04 1.71-.53 3.44-1.33 5.24-2.65.02-.01.03-.03.03-.05.41-4.3-.56-8.28-3.12-11.97a.08.08 0 0 0-.03-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.83 2.12-1.89 2.12z"/></svg>
+                </div>
+                <span class="btn-text">Discord</span>
+            </button>
+
+            <button class="btn" onclick="loginOAuth(event, 'github')">
+                <div class="btn-icon-wrapper">
+                    <svg viewBox="0 0 24 24"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+                </div>
+                <span class="btn-text">GitHub</span>
+            </button>
         </div>
 
-        <!-- ШАГ 2: ВВОД ПОЧТЫ -->
         <div id="email-step">
-            <input type="email" id="email-input" class="input-field" placeholder="Ваша электронная почта">
-            <button class="btn btn-email" id="send-code-btn" onclick="sendCode()">Получить код</button>
-            <button class="btn btn-back" onclick="showMainStep()">← Назад</button>
+            <input type="email" id="email-input" class="input-field" placeholder="Электронная почта">
+            <button class="btn-simple" id="send-code-btn" onclick="sendCode()">Получить код</button>
+            <button class="btn-back" onclick="showMainStep()">← Вернуться назад</button>
         </div>
 
-        <!-- ШАГ 3: ВВОД КОДА -->
         <div id="otp-step">
             <input type="text" id="otp-input" class="input-field" placeholder="Код из письма" maxlength="8" autocomplete="one-time-code">
-            <button class="btn btn-email" id="verify-code-btn" onclick="verifyCode()">Войти в приложение</button>
-            <button class="btn btn-back" onclick="showEmailStep()">← Изменить почту</button>
+            <button class="btn-simple" id="verify-code-btn" onclick="verifyCode()">Войти в приложение</button>
+            <button class="btn-back" onclick="showEmailStep()">← Изменить почту</button>
         </div>
 
         <div id="error-msg"></div>
@@ -114,7 +278,6 @@
 
         let currentUserEmail = '';
 
-        // --- ЛОГИКА ИНТЕРФЕЙСА ---
         function showError(msg) {
             const errorDiv = document.getElementById('error-msg');
             errorDiv.innerText = msg;
@@ -127,18 +290,18 @@
 
         function showMainStep() {
             hideError();
-            document.getElementById('main-step').style.display = 'block';
+            document.getElementById('main-step').style.display = 'flex';
             document.getElementById('email-step').style.display = 'none';
             document.getElementById('otp-step').style.display = 'none';
-            document.getElementById('status-text').innerText = 'Выберите удобный способ авторизации. Пароль не потребуется.';
+            document.getElementById('status-text').innerText = 'Как тебе удобнее войти?';
         }
 
         function showEmailStep() {
             hideError();
             document.getElementById('main-step').style.display = 'none';
-            document.getElementById('email-step').style.display = 'block';
+            document.getElementById('email-step').style.display = 'flex';
             document.getElementById('otp-step').style.display = 'none';
-            document.getElementById('status-text').innerText = 'Мы отправим код подтверждения на вашу почту.';
+            document.getElementById('status-text').innerText = 'Отправим код на твою почту.';
             document.getElementById('email-input').focus();
         }
 
@@ -146,28 +309,23 @@
             hideError();
             document.getElementById('main-step').style.display = 'none';
             document.getElementById('email-step').style.display = 'none';
-            document.getElementById('otp-step').style.display = 'block';
-            document.getElementById('status-text').innerText = 'Код отправлен на: \n' + currentUserEmail;
+            document.getElementById('otp-step').style.display = 'flex';
+            document.getElementById('status-text').innerText = 'Код улетел на:\n' + currentUserEmail;
             document.getElementById('otp-input').focus();
         }
 
-        // --- ЛОГИКА АВТОРИЗАЦИИ (БЕЗ ПАРОЛЯ) ---
         async function sendCode() {
             hideError();
             const email = document.getElementById('email-input').value.trim();
-            if (!email) return showError('Пожалуйста, введите почту.');
+            if (!email) return showError('Введи почту.');
 
             const btn = document.getElementById('send-code-btn');
             btn.innerText = 'Отправка...';
             btn.disabled = true;
 
             try {
-                const { error } = await supabaseClient.auth.signInWithOtp({
-                    email: email
-                });
-
+                const { error } = await supabaseClient.auth.signInWithOtp({ email: email });
                 if (error) throw error;
-
                 currentUserEmail = email;
                 showOtpStep();
             } catch (err) {
@@ -181,7 +339,7 @@
         async function verifyCode() {
             hideError();
             const code = document.getElementById('otp-input').value.trim();
-            if (!code) return showError('Пожалуйста, введите код.');
+            if (!code) return showError('Введи код.');
 
             const btn = document.getElementById('verify-code-btn');
             btn.innerText = 'Проверка...';
@@ -197,36 +355,28 @@
                 if (error) throw error;
 
                 if (data.session) {
-                    // Успех! Создаем ссылку для передачи токенов в десктопное приложение
                     const redirectUrl = `agnes://auth#access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}&expires_in=${data.session.expires_in}&token_type=${data.session.token_type}`;
-                    
-                    document.getElementById('status-text').innerHTML = '<span style="color:white; font-weight:bold;">Успешно!</span><br>Открываем Agnes...';
+                    document.getElementById('status-text').innerHTML = '<span style="color:white; font-weight:bold;">Успешно!</span><br>Возвращаемся в Agnes...';
                     document.getElementById('otp-step').style.display = 'none';
-                    
-                    // Перенаправляем пользователя в приложение
                     window.location.href = redirectUrl;
                 }
             } catch (err) {
-                showError('Неверный код. Попробуйте еще раз.');
+                showError('Неверный код. Попробуй еще раз.');
                 btn.innerText = 'Войти в приложение';
                 btn.disabled = false;
             }
         }
 
-        // --- СТАРАЯ ЛОГИКА OAUTH (Discord / GitHub) ---
         async function loginOAuth(event, providerName) {
-            const btn = event.target;
+            const btn = event.currentTarget.querySelector('.btn-text');
             const originalText = btn.innerText;
             btn.innerText = "Подключение...";
             
             try {
                 const { error } = await supabaseClient.auth.signInWithOAuth({
                     provider: providerName,
-                    options: {
-                        redirectTo: 'agnes://auth'
-                    }
+                    options: { redirectTo: 'agnes://auth' }
                 });
-                
                 if (error) throw error;
             } catch (err) {
                 showError('Ошибка: ' + err.message);
